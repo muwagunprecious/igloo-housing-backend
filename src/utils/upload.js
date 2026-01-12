@@ -3,9 +3,17 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../../uploads');
+// Ensure uploads directory exists
+// In Vercel (Production), we must use /tmp
+const isProduction = process.env.NODE_ENV === 'production';
+const uploadsDir = isProduction ? path.join('/tmp', 'uploads') : path.join(__dirname, '../../uploads');
+
 if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+    try {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    } catch (error) {
+        console.error('Failed to create uploads directory:', error);
+    }
 }
 
 // Configure storage

@@ -202,6 +202,12 @@ process.on('SIGINT', async () => {
     process.exit(0);
 });
 
-startServer();
+// Only listen if run directly (not imported)
+if (require.main === module) {
+    startServer();
+} else {
+    // For Vercel/Serverless: connect to DB immediately but don't listen
+    connectDB().catch(err => console.error('DB Connection Failed', err));
+}
 
 module.exports = { app, server, io };
