@@ -1,0 +1,40 @@
+{
+    "name": "igloo-estate-backend",
+    "version": "1.0.0",
+    "description": "Backend for Igloo Estate - Student housing platform with role-based access control",
+    "main": "server.js",
+    "scripts": {
+        "dev": "nodemon server.js",
+        "start": "node server.js",
+        "db:generate": "npx prisma generate",
+        "db:migrate": "npx prisma migrate dev",
+        "db:push": "npx prisma db push",
+        "db:studio": "npx prisma studio",
+        "db:seed": "node seed_user.js",
+        "seed:all": "node seed-all.js"
+    },
+    "keywords": [
+        "real-estate",
+        "student-housing",
+        "nodejs",
+        "express",
+        "prisma",
+        "socket.io"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@prisma/client": "^5.7.0",
+        "bcryptjs": "^3.0.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
+        "multer": "^1.4.5-lts.1",
+        "socket.io": "^4.6.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2",
+        "prisma": "^5.7.0"
+    }
+}

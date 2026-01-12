@@ -1,0 +1,198 @@
+// Prisma Schema for Igloo Estate
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+  url      = "postgresql://postgres.mrswfnmpmhbufhorutew:IglooEstate2026%21@aws-1-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require"
+}
+
+
+// User Model - Supports Student, Agent, and Admin roles
+model User {
+  id           String   @id @default(uuid())
+  fullName     String
+  email        String   @unique
+  password     String
+  role         String   @default("STUDENT")
+  avatar       String?
+  bio          String?
+  isVerified   Boolean  @default(false) // For agents - must be verified by admin
+  isBlocked    Boolean  @default(false) // Can be blocked by admin
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  universityId String? // Optional until migrated, but meant for students
+
+  // Relations
+  university       University?       @relation(fields: [universityId], references: [id])
+  properties       Property[]        @relation("AgentProperties")
+  messagesSent     Message[]         @relation("SentMessages")
+  messagesReceived Message[]         @relation("ReceivedMessages")
+  roommateRequests RoommateRequest[]
+  adminActions     AdminAction[]     @relation("AdminActions")
+  actionsReceived  AdminAction[]     @relation("TargetUser")
+  notifications    Notification[]
+  transactions     Transaction[]
+
+  @@index([email])
+  @@index([role])
+  @@index([universityId])
+  @@map("users")
+}
+
+// University Model - Managed by admin
+model University {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  state     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users      User[]
+  properties Property[]
+
+  @@map("universities")
+}
+
+// Property Model - Uploaded by agents after verification
+model Property {
+  id               String   @id @default(uuid())
+  agentId          String
+  title            String
+  description      String
+  price            Float
+  location         String
+  campus           String // Removed @relation from here because we want an actual University relation
+  universityId     String? // Link to University model
+  category         String
+  images           String // Stored as JSON string
+  bedrooms         Int
+  bathrooms        Int
+  roommatesAllowed Boolean  @default(false)
+  isAvailable      Boolean  @default(true)
+  rooms           Int      @default(1) // Number of rooms available
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  views           Int      @default(0) // Analytics: Total views
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  agent            User              @relation("AgentProperties", fields: [agentId], references: [id], onDelete: Cascade)
+  university       University?       @relation(fields: [universityId], references: [id])
+  roommateRequests RoommateRequest[]
+  transactions     Transaction[]
+
+  @@index([agentId])
+  @@index([universityId])
+  @@index([category])
+  @@index([isAvailable])
+  @@map("properties")
+}
+
+// Roommate Request Model - Students request to be roommates
+model RoommateRequest {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String? // Optional - can be a general request or specific to a property
+  budget     Float?
+  roomType   String?
+  genderPref String? // MALE, FEMALE, ANY
+  bio        String? // Short note
+  status     String   @default("PENDING") // ACTIVE, FULFILLED, ARCHIVED
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("roommate_requests")
+}
+
+// Message Model - Real-time chat between users
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  // Relations
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+// Admin Action Model - Track all admin activities
+model AdminAction {
+  id           String   @id @default(uuid())
+  adminId      String
+  actionType   String
+  targetUserId String?
+  description  String
+  createdAt    DateTime @default(now())
+
+  // Relations
+  admin      User  @relation("AdminActions", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("TargetUser", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([actionType])
+  @@index([createdAt])
+  @@map("admin_actions")
+}
+
+// Notification Model - For general system and user notifications
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("SYSTEM") // SYSTEM, MESSAGE, PROPERTY, ADMIN
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Transaction Model - Track all payments on the platform
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String
+  propertyId      String?
+  amount          Float
+  currency        String   @default("NGN")
+  status          String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  reference       String   @unique
+  provider        String   @default("PAYSTACK")
+  type            String   @default("RENT") // RENT, BOOKING, SERVICE
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([userId])
+  @@index([reference])
+  @@map("transactions")
+}
+
+

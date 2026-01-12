@@ -1,0 +1,16 @@
+🚀 Starting "My Properties" Endpoint Verification...
+✅ Agent Logged In
+Fetching /properties/agent/my-properties...
+✅ Success! Status: 200
+   Found 9 properties.
+   - Verifiable Property 1765811853996 (APPROVED)
+   - Verifiable Property 1765811706964 (PENDING)
+   - Verifiable Property 1765811655481 (PENDING)
+   - Verifiable Property 1765811513685 (PENDING)
+   - Verifiable Property 1765811491396 (PENDING)
+   - Verifiable Property 1765811172081 (PENDING)
+   - Verifiable Property 1765810710336 (PENDING)
+   - Verifiable Property 1765810640986 (PENDING)
+   - Verifiable Property 1765810567174 (PENDING)
+✅ Endpoint works and returns data.
+🏁 Done.
