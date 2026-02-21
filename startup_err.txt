@@ -1,0 +1,3 @@
+❌ Database connection failed: Can't reach database server at `54.247.26.119:6543`
+
+Please make sure your database server is running at `54.247.26.119:6543`.

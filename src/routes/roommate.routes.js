@@ -3,13 +3,14 @@ const router = express.Router();
 const roommateController = require('../controllers/roommate.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { requireStudent, requireAgent, requireVerifiedAgent } = require('../middleware/role.middleware');
+const { uploadMultiple } = require('../utils/upload');
 
 /**
  * @route   POST /api/roommate/request
  * @desc    Create roommate request
  * @access  Students only
  */
-router.post('/request', authenticate, requireStudent, roommateController.createRequest);
+router.post('/request', authenticate, requireStudent, uploadMultiple('media', 5), roommateController.createRequest);
 
 /**
  * @route   GET /api/roommate/my-requests

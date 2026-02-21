@@ -1,5 +1,6 @@
 const roommateService = require('../services/roommate.service');
 const Response = require('../utils/response');
+const { getFileUrl } = require('../utils/upload');
 
 class RoommateController {
     /**
@@ -7,6 +8,12 @@ class RoommateController {
      */
     async createRequest(req, res, next) {
         try {
+            // Handle uploaded files
+            if (req.files && req.files.length > 0) {
+                const mediaPaths = req.files.map(file => getFileUrl(file.path));
+                req.body.media = JSON.stringify(mediaPaths);
+            }
+
             const request = await roommateService.createRequest(req.user.id, req.body);
             return Response.created(res, 'Roommate request sent', request);
         } catch (error) {

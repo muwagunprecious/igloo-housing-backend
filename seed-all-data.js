@@ -1,6 +1,9 @@
-// Seed all initial data for Igloo Estate
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+
+console.log('🛠️ DATABASE_URL in seed:', process.env.DATABASE_URL ? process.env.DATABASE_URL.replace(/:[^:]*@/, ':****@') : 'NOT SET');
+
 const prisma = new PrismaClient();
 
 async function createAdminAccount() {

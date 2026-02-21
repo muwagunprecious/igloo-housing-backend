@@ -1,0 +1,41 @@
+================================================
+   DIAGNOSTIC: DATABASE CONNECTION TEST
+================================================
+
+🧪 Testing: Pooler (Transaction) - extracted from ENV
+   URL: postgresql://postgres.tsjphcyurlfxmxtvkucc:****@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+   ✅ SUCCESS! Connected to postgres as postgres
+   🕒 Server Time: Fri Feb 20 2026 18:54:01 GMT+0100 (West Africa Standard Time)
+
+🧪 Testing: Direct (Session) - extracted from ENV
+   URL: postgresql://postgres.tsjphcyurlfxmxtvkucc:****@aws-1-eu-west-1.pooler.supabase.com:5432/postgres
+   ❌ FAILED: MaxClientsInSessionMode: max clients reached - in Session mode max clients are limited to pool_size
+      Code: XX000
+
+🧪 Testing: Pooler (Transaction) - Explicit Construction
+   URL: postgres://postgres.mrswfnmpmhbufhorutew:****@aws-1-eu-north-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+   ❌ FAILED: Tenant or user not found
+      Code: XX000
+
+🧪 Testing: Direct (Session) - Explicit Construction
+   URL: postgres://postgres.mrswfnmpmhbufhorutew:****@aws-1-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require
+   ❌ FAILED: Tenant or user not found
+      Code: XX000
+
+🧪 Testing: Direct (Session) - DB DNS Construction
+   URL: postgres://postgres.mrswfnmpmhbufhorutew:****@db.mrswfnmpmhbufhorutew.supabase.co:5432/postgres?sslmode=require
+   ❌ FAILED: getaddrinfo ENOTFOUND db.mrswfnmpmhbufhorutew.supabase.co
+      Code: ENOTFOUND
+
+🧪 Testing: Direct (Session) - Standard Postgres User
+   URL: postgres://postgres:****@db.mrswfnmpmhbufhorutew.supabase.co:5432/postgres?sslmode=require
+   ❌ FAILED: getaddrinfo ENOTFOUND db.mrswfnmpmhbufhorutew.supabase.co
+      Code: ENOTFOUND
+
+🧪 Testing: Prisma Client (using DATABASE_URL from env)
+   ❌ FAILED: The table `public.properties` does not exist in the current database.
+
+================================================
+   TEST COMPLETE
+   ✅ 1 connections succeeded.
+================================================

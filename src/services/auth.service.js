@@ -44,6 +44,7 @@ class AuthService {
                 role: true,
                 avatar: true,
                 bio: true,
+                universityId: true,
                 isVerified: true,
                 createdAt: true,
             },
@@ -122,6 +123,7 @@ class AuthService {
                 role: true,
                 avatar: true,
                 bio: true,
+                universityId: true,
                 isVerified: true,
                 isBlocked: true,
                 createdAt: true,
@@ -154,6 +156,10 @@ class AuthService {
             updateData.avatar = data.avatar;
         }
 
+        if (data.universityId !== undefined) {
+            updateData.universityId = data.universityId;
+        }
+
         const user = await prisma.user.update({
             where: { id: userId },
             data: updateData,
@@ -164,6 +170,7 @@ class AuthService {
                 role: true,
                 avatar: true,
                 bio: true,
+                universityId: true,
                 isVerified: true,
                 createdAt: true,
                 updatedAt: true,

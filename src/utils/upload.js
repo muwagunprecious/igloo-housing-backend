@@ -19,7 +19,10 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const folder = file.fieldname === 'avatar' ? 'avatars' : 'properties';
+        let folder = 'properties';
+        if (file.fieldname === 'avatar') folder = 'avatars';
+        if (file.fieldname === 'media' || file.fieldname === 'roommate_media') folder = 'roommates';
+
         const destPath = path.join(uploadsDir, folder);
 
         if (!fs.existsSync(destPath)) {
@@ -36,14 +39,14 @@ const storage = multer.diskStorage({
 
 // File filter for images only
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|webm|ogg/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
         return cb(null, true);
     } else {
-        cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+        cb(new Error('Only image and video files are allowed (jpeg, jpg, png, gif, webp, mp4, webm, ogg)'));
     }
 };
 

@@ -70,7 +70,7 @@ class AuthController {
      */
     async updateProfile(req, res, next) {
         try {
-            const { fullName, bio } = req.body;
+            const { fullName, bio, universityId } = req.body;
 
             // Handle avatar upload
             let avatar = undefined;
@@ -82,6 +82,7 @@ class AuthController {
                 fullName,
                 bio,
                 avatar,
+                universityId,
             });
 
             return Response.success(res, 'Profile updated successfully', user);

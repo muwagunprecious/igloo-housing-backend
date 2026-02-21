@@ -5,7 +5,7 @@ class RoommateService {
      * Create roommate request
      */
     async createRequest(userId, data) {
-        const { propertyId, budget, roomType, genderPref, bio } = data;
+        const { propertyId, budget, roomType, genderPref, bio, houseLink, media } = data;
 
         if (propertyId) {
             // Check if property exists
@@ -62,6 +62,8 @@ class RoommateService {
                     roomType: roomType || null,
                     genderPref: genderPref || null,
                     bio: bio || null,
+                    houseLink: houseLink || null,
+                    media: media ? (typeof media === 'string' ? media : JSON.stringify(media)) : null,
                 },
                 include: {
                     user: {
@@ -109,6 +111,8 @@ class RoommateService {
                 roomType: roomType || null,
                 genderPref: genderPref || null,
                 bio: bio || null,
+                houseLink: houseLink || null,
+                media: media ? (typeof media === 'string' ? media : JSON.stringify(media)) : null,
             },
             include: {
                 user: {

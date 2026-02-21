@@ -4,9 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // url      = env("DATABASE_URL")
-  url      = "postgresql://postgres.mrswfnmpmhbufhorutew:IglooEstate2026%21@aws-1-eu-north-1.pooler.supabase.com:5432/postgres?sslmode=require"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 
@@ -101,6 +101,8 @@ model RoommateRequest {
   roomType   String?
   genderPref String? // MALE, FEMALE, ANY
   bio        String? // Short note
+  houseLink  String? // External link to house (optional)
+  media      String? // Stored as JSON string (images/videos)
   status     String   @default("PENDING") // ACTIVE, FULFILLED, ARCHIVED
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
