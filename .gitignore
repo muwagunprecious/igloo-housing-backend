@@ -31,5 +31,5 @@ coverage
 
 # Vercel (backend runs locally only)
 .vercel
-vercel.json
-api/
+# vercel.json
+# api/
