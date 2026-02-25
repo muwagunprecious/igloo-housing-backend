@@ -57,6 +57,24 @@ app.get('/', (req, res) => {
     res.send('Igloo Estate API is running...');
 });
 
+// Diagnostic route for DB
+app.get('/api/test-db', async (req, res) => {
+    try {
+        const count = await prisma.property.count();
+        res.json({
+            success: true,
+            message: 'Database connection successful',
+            propertyCount: count
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Database connection failed',
+            error: error.message
+        });
+    }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
