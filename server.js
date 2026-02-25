@@ -53,6 +53,10 @@ app.get('/health', (req, res) => {
     });
 });
 
+app.get('/', (req, res) => {
+    res.send('Igloo Estate API is running...');
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
