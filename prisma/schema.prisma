@@ -1,4 +1,3 @@
-// Prisma Schema for Igloo Estate
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,32 +8,28 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
-// User Model - Supports Student, Agent, and Admin roles
 model User {
-  id           String   @id @default(uuid())
-  fullName     String
-  email        String   @unique
-  password     String
-  role         String   @default("STUDENT")
-  avatar       String?
-  bio          String?
-  isVerified   Boolean  @default(false) // For agents - must be verified by admin
-  isBlocked    Boolean  @default(false) // Can be blocked by admin
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  universityId String? // Optional until migrated, but meant for students
-
-  // Relations
-  university       University?       @relation(fields: [universityId], references: [id])
-  properties       Property[]        @relation("AgentProperties")
-  messagesSent     Message[]         @relation("SentMessages")
-  messagesReceived Message[]         @relation("ReceivedMessages")
-  roommateRequests RoommateRequest[]
+  id               String            @id @default(uuid())
+  fullName         String
+  email            String            @unique
+  password         String
+  role             String            @default("STUDENT")
+  avatar           String?
+  bio              String?
+  isVerified       Boolean           @default(false)
+  isBlocked        Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  universityId     String?
   adminActions     AdminAction[]     @relation("AdminActions")
   actionsReceived  AdminAction[]     @relation("TargetUser")
+  messagesReceived Message[]         @relation("ReceivedMessages")
+  messagesSent     Message[]         @relation("SentMessages")
   notifications    Notification[]
+  properties       Property[]        @relation("AgentProperties")
+  roommateRequests RoommateRequest[]
   transactions     Transaction[]
+  university       University?       @relation(fields: [universityId], references: [id])
 
   @@index([email])
   @@index([role])
@@ -42,44 +37,38 @@ model User {
   @@map("users")
 }
 
-// University Model - Managed by admin
 model University {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  state     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  users      User[]
+  id         String     @id @default(uuid())
+  name       String     @unique
+  state      String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   properties Property[]
+  users      User[]
 
   @@map("universities")
 }
 
-// Property Model - Uploaded by agents after verification
 model Property {
-  id               String   @id @default(uuid())
+  id               String            @id @default(uuid())
   agentId          String
   title            String
   description      String
   price            Float
   location         String
-  campus           String // Removed @relation from here because we want an actual University relation
-  universityId     String? // Link to University model
+  campus           String
+  universityId     String?
   category         String
-  images           String // Stored as JSON string
+  images           String
   bedrooms         Int
   bathrooms        Int
-  roommatesAllowed Boolean  @default(false)
-  isAvailable      Boolean  @default(true)
-  rooms           Int      @default(1) // Number of rooms available
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  views           Int      @default(0) // Analytics: Total views
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
+  roommatesAllowed Boolean           @default(false)
+  isAvailable      Boolean           @default(true)
+  rooms            Int               @default(1)
+  status           String            @default("PENDING")
+  views            Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   agent            User              @relation("AgentProperties", fields: [agentId], references: [id], onDelete: Cascade)
   university       University?       @relation(fields: [universityId], references: [id])
   roommateRequests RoommateRequest[]
@@ -92,24 +81,21 @@ model Property {
   @@map("properties")
 }
 
-// Roommate Request Model - Students request to be roommates
 model RoommateRequest {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   userId     String
-  propertyId String? // Optional - can be a general request or specific to a property
+  propertyId String?
   budget     Float?
   roomType   String?
-  genderPref String? // MALE, FEMALE, ANY
-  bio        String? // Short note
-  houseLink  String? // External link to house (optional)
-  media      String? // Stored as JSON string (images/videos)
-  status     String   @default("PENDING") // ACTIVE, FULFILLED, ARCHIVED
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  genderPref String?
+  bio        String?
+  houseLink  String?
+  media      String?
+  status     String    @default("PENDING")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  property   Property? @relation(fields: [propertyId], references: [id])
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([propertyId])
@@ -117,7 +103,6 @@ model RoommateRequest {
   @@map("roommate_requests")
 }
 
-// Message Model - Real-time chat between users
 model Message {
   id         String   @id @default(uuid())
   senderId   String
@@ -125,10 +110,8 @@ model Message {
   message    String
   isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
-
-  // Relations
-  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])
@@ -136,7 +119,6 @@ model Message {
   @@map("messages")
 }
 
-// Admin Action Model - Track all admin activities
 model AdminAction {
   id           String   @id @default(uuid())
   adminId      String
@@ -144,10 +126,8 @@ model AdminAction {
   targetUserId String?
   description  String
   createdAt    DateTime @default(now())
-
-  // Relations
-  admin      User  @relation("AdminActions", fields: [adminId], references: [id], onDelete: Cascade)
-  targetUser User? @relation("TargetUser", fields: [targetUserId], references: [id], onDelete: SetNull)
+  admin        User     @relation("AdminActions", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser   User?    @relation("TargetUser", fields: [targetUserId], references: [id])
 
   @@index([adminId])
   @@index([actionType])
@@ -155,18 +135,15 @@ model AdminAction {
   @@map("admin_actions")
 }
 
-// Notification Model - For general system and user notifications
 model Notification {
   id        String   @id @default(uuid())
   userId    String
   title     String
   message   String
-  type      String   @default("SYSTEM") // SYSTEM, MESSAGE, PROPERTY, ADMIN
+  type      String   @default("SYSTEM")
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isRead])
@@ -174,27 +151,22 @@ model Notification {
   @@map("notifications")
 }
 
-// Transaction Model - Track all payments on the platform
 model Transaction {
-  id              String   @id @default(uuid())
-  userId          String
-  propertyId      String?
-  amount          Float
-  currency        String   @default("NGN")
-  status          String   @default("PENDING") // PENDING, SUCCESS, FAILED
-  reference       String   @unique
-  provider        String   @default("PAYSTACK")
-  type            String   @default("RENT") // RENT, BOOKING, SERVICE
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  user     User      @relation(fields: [userId], references: [id])
-  property Property? @relation(fields: [propertyId], references: [id])
+  id         String    @id @default(uuid())
+  userId     String
+  propertyId String?
+  amount     Float
+  currency   String    @default("NGN")
+  status     String    @default("PENDING")
+  reference  String    @unique
+  provider   String    @default("PAYSTACK")
+  type       String    @default("RENT")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  property   Property? @relation(fields: [propertyId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([reference])
   @@map("transactions")
 }
-
-
