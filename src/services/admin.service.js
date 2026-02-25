@@ -129,6 +129,46 @@ class AdminService {
     }
 
     /**
+     * Reject an agent application (revert to STUDENT)
+     */
+    async rejectAgent(adminId, agentId, reason = '') {
+        const agent = await prisma.user.findUnique({
+            where: { id: agentId },
+        });
+
+        if (!agent) {
+            throw { message: 'Agent not found', statusCode: 404 };
+        }
+
+        if (agent.role !== 'AGENT') {
+            throw { message: 'User is not an agent', statusCode: 400 };
+        }
+
+        const [updatedUser] = await prisma.$transaction([
+            prisma.user.update({
+                where: { id: agentId },
+                data: { role: 'STUDENT', isVerified: false },
+                select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    role: true,
+                },
+            }),
+            prisma.adminAction.create({
+                data: {
+                    adminId,
+                    actionType: 'REJECT_AGENT',
+                    targetUserId: agentId,
+                    description: `Rejected agent application: ${agent.fullName}. Reason: ${reason || 'No reason provided'}`,
+                },
+            }),
+        ]);
+
+        return updatedUser;
+    }
+
+    /**
      * Block a user
      */
     async blockUser(adminId, userId, reason = '') {

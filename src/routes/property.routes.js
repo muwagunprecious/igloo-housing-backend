@@ -6,6 +6,14 @@ const { requireVerifiedAgent, requireAgent } = require('../middleware/role.middl
 const { uploadMultiple } = require('../utils/upload');
 
 /**
+ * @route   GET /api/properties/agent/my-properties
+ * @desc    Get agent's own properties
+ * @access  Agents only
+ * NOTE: This MUST be defined BEFORE /:id to avoid Express treating 'agent' as an ID param
+ */
+router.get('/agent/my-properties', authenticate, requireAgent, propertyController.getAgentProperties);
+
+/**
  * @route   GET /api/properties
  * @desc    Get all properties with filters
  * @access  Public
@@ -51,19 +59,5 @@ router.put(
  * @access  Verified agents only (own properties)
  */
 router.delete('/:id', authenticate, propertyController.deleteProperty);
-
-/**
- * @route   GET /api/properties/agent/my-properties
- * @desc    Get agent's own properties
- * @access  Agents only
- */
-router.get('/agent/my-properties', authenticate, requireAgent, propertyController.getAgentProperties); // Wait, propertyController has getProperties (all) but not getAgentProperties??
-// Let me check propertyController.js Step 116 again.
-// It DOES NOT have getAgentProperties.
-// But agentController.js (Step 115) DOES have getAgentProperties.
-// The route /agent/my-properties should probably use agentController.getAgentProperties? 
-// OR I should use propertyController.getProperties and filter by agentId? 
-// property.routes.js had `propertyController.getAgentProperties`.
-// I will check if I should move it or just correct the import.
 
 module.exports = router;

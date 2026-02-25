@@ -40,6 +40,20 @@ class AdminController {
     }
 
     /**
+     * Reject agent (revert to student role)
+     */
+    async rejectAgent(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { reason } = req.body;
+            const agent = await adminService.rejectAgent(req.user.id, id, reason);
+            return Response.success(res, 'Agent application rejected', agent);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * Block user
      */
     async blockUser(req, res, next) {

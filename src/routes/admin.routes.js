@@ -30,6 +30,13 @@ router.get('/agents/pending', adminController.getPendingAgents);
 router.put('/agents/verify/:id', adminController.verifyAgent);
 
 /**
+ * @route   PUT /api/admin/agents/reject/:id
+ * @desc    Reject an agent application
+ * @access  Admin only
+ */
+router.put('/agents/reject/:id', adminController.rejectAgent);
+
+/**
  * @route   PUT /api/admin/block/:id
  * @desc    Block a user
  * @access  Admin only

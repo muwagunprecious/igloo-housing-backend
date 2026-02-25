@@ -1,0 +1,32 @@
+﻿DATABASE_URL host: aws-1-eu-north-1.pooler.supabase.com:6543
+DIRECT_URL set: true
+node : Γ¥î Connection 
+failed: Can't reach 
+database server at `aw
+s-1-eu-north-1.pooler.
+supabase.com:6543`
+At line:1 char:1
++ node 
+test-connection.js 
+2>&1 | Out-File 
+-FilePath 
+"test-result.txt" - 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Γ¥î Connec   
+ tion ...abase.com    
+:6543`:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+
+Please make sure your 
+database server is 
+running at `aws-1-eu-n
+orth-1.pooler.supabase
+.com:6543`.
