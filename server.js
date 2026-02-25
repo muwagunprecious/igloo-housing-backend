@@ -210,4 +210,8 @@ if (require.main === module) {
     connectDB().catch(err => console.error('DB Connection Failed', err));
 }
 
-module.exports = { app, server, io };
+// Export app directly for Vercel compatibility
+// Attach server and io to app for any consumers who might need them
+app.server = server;
+app.io = io;
+module.exports = app;
