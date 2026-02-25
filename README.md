@@ -52,11 +52,11 @@ npm install
 ```
 
 2. **Set up environment variables**
-The `.env` file is already configured with:
+The `.env` file should be configured with:
 ```env
-DATABASE_URL="postgresql://postgres:Precious2006?@db.mdhjuzpdyffctvkwhkeg.supabase.co:5432/postgres"
-JWT_SECRET="SUPER_SECRET_KEY_123"
-PORT=5000
+DATABASE_URL="postgresql://your_user:your_password@your_host:5432/your_db"
+JWT_SECRET="your_secure_random_json_web_token_secret"
+PORT=5001
 NODE_ENV=development
 ```
 
