@@ -35,6 +35,7 @@ class AuthService {
                 role: (data.role || 'STUDENT').toUpperCase(),
                 avatar: data.avatar || null,
                 bio: data.bio || null,
+                whatsapp: data.whatsapp || null,
                 universityId: data.universityId || null,
             },
             select: {
@@ -44,6 +45,7 @@ class AuthService {
                 role: true,
                 avatar: true,
                 bio: true,
+                whatsapp: true,
                 universityId: true,
                 isVerified: true,
                 createdAt: true,
@@ -123,6 +125,7 @@ class AuthService {
                 role: true,
                 avatar: true,
                 bio: true,
+                whatsapp: true,
                 universityId: true,
                 isVerified: true,
                 isBlocked: true,
@@ -152,6 +155,10 @@ class AuthService {
             updateData.bio = Validators.sanitize(data.bio);
         }
 
+        if (data.whatsapp !== undefined) {
+            updateData.whatsapp = Validators.sanitize(data.whatsapp);
+        }
+
         if (data.avatar !== undefined) {
             updateData.avatar = data.avatar;
         }
@@ -170,6 +177,7 @@ class AuthService {
                 role: true,
                 avatar: true,
                 bio: true,
+                whatsapp: true,
                 universityId: true,
                 isVerified: true,
                 createdAt: true,

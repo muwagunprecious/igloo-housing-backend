@@ -3,7 +3,7 @@ const router = express.Router();
 const propertyController = require('../controllers/property.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { requireVerifiedAgent, requireAgent } = require('../middleware/role.middleware');
-const { uploadMultiple } = require('../utils/upload');
+const { uploadMultiple, upload } = require('../utils/upload');
 
 /**
  * @route   GET /api/properties/agent/my-properties
@@ -36,7 +36,7 @@ router.post(
     '/',
     authenticate,
     requireVerifiedAgent,
-    uploadMultiple('images', 10),
+    upload.fields([{ name: 'images', maxCount: 10 }, { name: 'video', maxCount: 1 }]),
     propertyController.createProperty
 );
 
@@ -49,7 +49,7 @@ router.put(
     '/:id',
     authenticate,
     requireVerifiedAgent,
-    uploadMultiple('images', 10),
+    upload.fields([{ name: 'images', maxCount: 10 }, { name: 'video', maxCount: 1 }]),
     propertyController.updateProperty
 );
 

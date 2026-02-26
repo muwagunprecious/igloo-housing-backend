@@ -16,6 +16,7 @@ model User {
   role             String            @default("STUDENT")
   avatar           String?
   bio              String?
+  whatsapp         String?
   isVerified       Boolean           @default(false)
   isBlocked        Boolean           @default(false)
   createdAt        DateTime          @default(now())
@@ -60,6 +61,7 @@ model Property {
   universityId     String?
   category         String
   images           String
+  video            String?
   bedrooms         Int
   bathrooms        Int
   roommatesAllowed Boolean           @default(false)

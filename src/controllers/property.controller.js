@@ -46,10 +46,16 @@ class PropertyController {
         try {
             const propertyData = req.body;
 
-            // Handle multiple image uploads
-            const images = req.files ? req.files.map(file => getFileUrl(file.path)) : [];
+            // Handle multi-field file uploads
+            const images = req.files?.images ? req.files.images.map(file => getFileUrl(file.path)) : [];
+            const video = req.files?.video ? getFileUrl(req.files.video[0].path) : null;
 
-            const property = await propertyService.createProperty(req.user.id, propertyData, images);
+            // Validation: Picture first before video
+            if (video && images.length === 0) {
+                return Response.error(res, 'You must upload at least one picture before adding a video', 400);
+            }
+
+            const property = await propertyService.createProperty(req.user.id, propertyData, images, video);
             return Response.created(res, 'Property created successfully', property);
         } catch (error) {
             next(error);
@@ -64,10 +70,11 @@ class PropertyController {
             const { id } = req.params;
             const propertyData = req.body;
 
-            // Handle new image uploads
-            const newImages = req.files ? req.files.map(file => getFileUrl(file.path)) : [];
+            // Handle multi-field file uploads
+            const newImages = req.files?.images ? req.files.images.map(file => getFileUrl(file.path)) : [];
+            const newVideo = req.files?.video ? getFileUrl(req.files.video[0].path) : null;
 
-            const property = await propertyService.updateProperty(id, req.user.id, propertyData, newImages);
+            const property = await propertyService.updateProperty(id, req.user.id, propertyData, newImages, newVideo);
             return Response.success(res, 'Property updated successfully', property);
         } catch (error) {
             next(error);

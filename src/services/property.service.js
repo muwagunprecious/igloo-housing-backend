@@ -48,6 +48,7 @@ class PropertyService {
                         fullName: true,
                         email: true,
                         avatar: true,
+                        whatsapp: true,
                         isVerified: true,
                     },
                 },
@@ -82,6 +83,7 @@ class PropertyService {
                         email: true,
                         avatar: true,
                         bio: true,
+                        whatsapp: true,
                         isVerified: true,
                     },
                 },
@@ -117,7 +119,7 @@ class PropertyService {
     /**
      * Create new property (Agent only)
      */
-    async createProperty(callerId, data, images = []) {
+    async createProperty(callerId, data, images = [], video = null) {
         // Validate input
         const validation = Validators.validateProperty(data);
         if (!validation.isValid) {
@@ -158,6 +160,7 @@ class PropertyService {
                 universityId: agent.universityId, // Enforce agent's university
                 category: data.category,
                 images: JSON.stringify(images),
+                video: video,
                 bedrooms: parseInt(data.bedrooms),
                 bathrooms: parseInt(data.bathrooms),
                 rooms: parseInt(data.rooms || 1),
@@ -170,6 +173,7 @@ class PropertyService {
                         fullName: true,
                         email: true,
                         avatar: true,
+                        whatsapp: true,
                     },
                 },
                 university: {
@@ -188,7 +192,7 @@ class PropertyService {
     /**
      * Update property (Agent only - own properties)
      */
-    async updateProperty(propertyId, agentId, data, newImages = []) {
+    async updateProperty(propertyId, agentId, data, newImages = [], newVideo = null) {
         const property = await prisma.property.findUnique({
             where: { id: propertyId },
         });
@@ -221,9 +225,19 @@ class PropertyService {
         }
 
         // Handle images
+        let finalImages = JSON.parse(property.images || '[]');
         if (newImages.length > 0) {
-            const existingImages = JSON.parse(property.images || '[]');
-            updateData.images = JSON.stringify([...existingImages, ...newImages]);
+            finalImages = [...finalImages, ...newImages];
+            updateData.images = JSON.stringify(finalImages);
+        }
+
+        // Handle video
+        if (newVideo) {
+            // Validation: Ensure there's at least one image (new or existing)
+            if (finalImages.length === 0) {
+                throw { message: 'You must have at least one picture before adding a video', statusCode: 400 };
+            }
+            updateData.video = newVideo;
         }
 
         // Verify campus if changing
@@ -249,6 +263,7 @@ class PropertyService {
                         fullName: true,
                         email: true,
                         avatar: true,
+                        whatsapp: true,
                     },
                 },
                 university: {

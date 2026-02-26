@@ -69,19 +69,18 @@ class AuthController {
      * Update user profile
      */
     async updateProfile(req, res, next) {
+        console.log('👤 updateProfile request body:', req.body);
         try {
-            const { fullName, bio, universityId } = req.body;
+            const { fullName, bio, whatsapp, universityId } = req.body;
+            const avatarUrl = req.file ? getFileUrl(req.file.path) : null;
 
-            // Handle avatar upload
-            let avatar = undefined;
-            if (req.file) {
-                avatar = getFileUrl(req.file.path);
-            }
+            console.log('👤 Saving WhatsApp:', whatsapp);
 
             const user = await authService.updateProfile(req.user.id, {
                 fullName,
                 bio,
-                avatar,
+                whatsapp,
+                avatar: avatarUrl || req.user.avatar,
                 universityId,
             });
 
