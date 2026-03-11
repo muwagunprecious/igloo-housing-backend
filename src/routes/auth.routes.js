@@ -9,7 +9,7 @@ const { uploadSingle } = require('../utils/upload');
  * @desc    Register new user
  * @access  Public
  */
-router.post('/register', authController.register);
+router.post('/register', uploadSingle('avatar'), authController.register);
 
 /**
  * @route   POST /api/auth/login
