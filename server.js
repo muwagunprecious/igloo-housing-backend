@@ -75,6 +75,23 @@ app.get('/api/test-db', async (req, res) => {
     }
 });
 
+// Diagnostic route for code version
+app.get('/api/debug-code', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(__dirname, 'src', 'controllers', 'property.controller.js');
+    try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        res.json({
+            success: true,
+            hasSupabase: content.includes('uploadToSupabase'),
+            content: content.substring(0, 500) + '...' // Return first 500 chars
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
