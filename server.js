@@ -92,6 +92,23 @@ app.get('/api/debug-code', (req, res) => {
     }
 });
 
+// TEST ENDPOINT: Check latest property in DB
+app.get('/api/check-latest', async (req, res) => {
+    try {
+        const latest = await prisma.property.findFirst({
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json({
+            success: true,
+            title: latest.title,
+            images: latest.images,
+            createdAt: latest.createdAt
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
