@@ -5,11 +5,17 @@ const Response = require('../utils/response');
  */
 const errorHandler = (err, req, res, next) => {
     // Log error for debugging
-    console.error('=== ERROR OCCURRED ===');
-    console.error('Path:', req.method, req.path);
-    console.error('Error:', err);
-    console.error('Stack:', err.stack);
-    console.error('=====================');
+    console.error('=== 💥 DETAILED ERROR LOG ===');
+    console.error('Time:', new Date().toISOString());
+    console.error('Method:', req.method);
+    console.error('Path:', req.path);
+    console.error('Body:', JSON.stringify(req.body, null, 2));
+    console.error('Error Name:', err.name);
+    console.error('Error Message:', err.message);
+    if (err.stack) console.error('Stack:', err.stack);
+    if (err.errors) console.error('Validation Errors:', JSON.stringify(err.errors, null, 2));
+    if (err.code) console.error('Prisma Code:', err.code);
+    console.error('=============================');
 
     // Prisma errors
     if (err.code) {

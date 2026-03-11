@@ -50,14 +50,18 @@ class PropertyController {
             // Handle multi-field file uploads to Supabase
             let images = [];
             if (req.files?.images) {
+                console.log('📸 Uploading', req.files.images.length, 'images to Supabase...');
                 images = await Promise.all(
                     req.files.images.map(file => uploadToSupabase(file))
                 );
+                console.log('✅ Images uploaded:', images);
             }
 
             let video = null;
             if (req.files?.video) {
+                console.log('🎥 Uploading video to Supabase...');
                 video = await uploadToSupabase(req.files.video[0]);
+                console.log('✅ Video uploaded:', video);
             }
 
             // Validation: Picture first before video
