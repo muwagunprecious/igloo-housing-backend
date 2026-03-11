@@ -45,10 +45,20 @@ class PropertyController {
     async createProperty(req, res, next) {
         try {
             const propertyData = req.body;
+            const { uploadToSupabase } = require('../utils/supabase');
 
-            // Handle multi-field file uploads
-            const images = req.files?.images ? req.files.images.map(file => getFileUrl(file.path)) : [];
-            const video = req.files?.video ? getFileUrl(req.files.video[0].path) : null;
+            // Handle multi-field file uploads to Supabase
+            let images = [];
+            if (req.files?.images) {
+                images = await Promise.all(
+                    req.files.images.map(file => uploadToSupabase(file))
+                );
+            }
+
+            let video = null;
+            if (req.files?.video) {
+                video = await uploadToSupabase(req.files.video[0]);
+            }
 
             // Validation: Picture first before video
             if (video && images.length === 0) {
@@ -69,10 +79,20 @@ class PropertyController {
         try {
             const { id } = req.params;
             const propertyData = req.body;
+            const { uploadToSupabase } = require('../utils/supabase');
 
-            // Handle multi-field file uploads
-            const newImages = req.files?.images ? req.files.images.map(file => getFileUrl(file.path)) : [];
-            const newVideo = req.files?.video ? getFileUrl(req.files.video[0].path) : null;
+            // Handle multi-field file uploads to Supabase
+            let newImages = [];
+            if (req.files?.images) {
+                newImages = await Promise.all(
+                    req.files.images.map(file => uploadToSupabase(file))
+                );
+            }
+
+            let newVideo = null;
+            if (req.files?.video) {
+                newVideo = await uploadToSupabase(req.files.video[0]);
+            }
 
             const property = await propertyService.updateProperty(id, req.user.id, propertyData, newImages, newVideo);
             return Response.success(res, 'Property updated successfully', property);

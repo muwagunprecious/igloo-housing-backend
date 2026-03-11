@@ -9,11 +9,12 @@ class AuthController {
     async register(req, res, next) {
         try {
             const { fullName, email, password, role, bio, universityId } = req.body;
+            const { uploadToSupabase } = require('../utils/supabase');
 
-            // Handle avatar upload
+            // Handle avatar upload to Supabase
             let avatar = null;
             if (req.file) {
-                avatar = getFileUrl(req.file.path);
+                avatar = await uploadToSupabase(req.file);
             }
 
             const result = await authService.register({
@@ -21,7 +22,6 @@ class AuthController {
                 email,
                 password,
                 role,
-                bio,
                 bio,
                 avatar,
                 universityId,
@@ -72,7 +72,12 @@ class AuthController {
         console.log('👤 updateProfile request body:', req.body);
         try {
             const { fullName, bio, whatsapp, universityId } = req.body;
-            const avatarUrl = req.file ? getFileUrl(req.file.path) : null;
+            const { uploadToSupabase } = require('../utils/supabase');
+
+            let avatarUrl = null;
+            if (req.file) {
+                avatarUrl = await uploadToSupabase(req.file);
+            }
 
             console.log('👤 Saving WhatsApp:', whatsapp);
 

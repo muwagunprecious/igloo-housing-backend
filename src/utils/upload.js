@@ -1,43 +1,10 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-// Ensure uploads directory exists
-// Ensure uploads directory exists
-// In Vercel (Production), we must use /tmp
-const isProduction = process.env.NODE_ENV === 'production';
-const uploadsDir = isProduction ? path.join('/tmp', 'uploads') : path.join(__dirname, '../../uploads');
+// Configure memory storage
+const storage = multer.memoryStorage();
 
-if (!fs.existsSync(uploadsDir)) {
-    try {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-    } catch (error) {
-        console.error('Failed to create uploads directory:', error);
-    }
-}
-
-// Configure storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let folder = 'properties';
-        if (file.fieldname === 'avatar') folder = 'avatars';
-        if (file.fieldname === 'media' || file.fieldname === 'roommate_media') folder = 'roommates';
-
-        const destPath = path.join(uploadsDir, folder);
-
-        if (!fs.existsSync(destPath)) {
-            fs.mkdirSync(destPath, { recursive: true });
-        }
-
-        cb(null, destPath);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    },
-});
-
-// File filter for images only
+// File filter for images and videos
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|webm|ogg/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -54,7 +21,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 30 * 1024 * 1024, // 30MB max file size
+        fileSize: 50 * 1024 * 1024, // 50MB max file size (increased for videos on Vercel)
     },
     fileFilter: fileFilter,
 });
@@ -74,28 +41,18 @@ const uploadMultiple = (fieldName, maxCount = 10) => {
 };
 
 /**
- * Delete file from server
+ * Delete file from server (Not applicable for Supabase, but kept for compatibility)
  */
 const deleteFile = (filePath) => {
-    try {
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error('Error deleting file:', error);
-        return false;
-    }
+    return true;
 };
 
 /**
- * Get file URL from path
+ * Get file URL from path (Legacy fallback)
  */
 const getFileUrl = (filePath) => {
     if (!filePath) return null;
-    // Return relative path for URL
-    return filePath.replace(/\\/g, '/').replace(/^.*\/uploads\//, '/uploads/');
+    return filePath;
 };
 
 module.exports = {

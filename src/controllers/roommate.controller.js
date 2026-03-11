@@ -8,10 +8,14 @@ class RoommateController {
      */
     async createRequest(req, res, next) {
         try {
-            // Handle uploaded files
+            const { uploadToSupabase } = require('../utils/supabase');
+
+            // Handle uploaded files to Supabase
             if (req.files && req.files.length > 0) {
-                const mediaPaths = req.files.map(file => getFileUrl(file.path));
-                req.body.media = JSON.stringify(mediaPaths);
+                const mediaUrls = await Promise.all(
+                    req.files.map(file => uploadToSupabase(file))
+                );
+                req.body.media = JSON.stringify(mediaUrls);
             }
 
             const request = await roommateService.createRequest(req.user.id, req.body);
