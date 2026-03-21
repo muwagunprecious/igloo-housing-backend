@@ -258,6 +258,7 @@ class AdminService {
      * Remove a property
      */
     async removeProperty(adminId, propertyId, reason = '') {
+        console.log(`🛡️ Admin ${adminId} attempting to remove property: ${propertyId}. Reason: ${reason}`);
         const property = await prisma.property.findUnique({
             where: { id: propertyId },
             include: {
@@ -289,6 +290,7 @@ class AdminService {
             }),
         ]);
 
+        console.log(`✅ Admin ${adminId} removed property ${propertyId} successfully`);
         return true;
     }
 

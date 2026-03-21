@@ -96,7 +96,7 @@ model RoommateRequest {
   status     String    @default("PENDING")
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  property   Property? @relation(fields: [propertyId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -165,7 +165,7 @@ model Transaction {
   type       String    @default("RENT")
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  property   Property? @relation(fields: [propertyId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([userId])

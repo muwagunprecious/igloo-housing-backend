@@ -283,6 +283,7 @@ class PropertyService {
      * Delete property (Agent only - own properties)
      */
     async deleteProperty(propertyId, agentId) {
+        console.log(`🗑️ Attempting to delete property: ${propertyId} by agent: ${agentId}`);
         const property = await prisma.property.findUnique({
             where: { id: propertyId },
         });
@@ -300,6 +301,7 @@ class PropertyService {
             where: { id: propertyId },
         });
 
+        console.log(`✅ Property ${propertyId} deleted successfully`);
         return true;
     }
 
