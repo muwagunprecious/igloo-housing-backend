@@ -36,7 +36,7 @@ router.post(
     '/',
     authenticate,
     requireVerifiedAgent,
-    upload.fields([{ name: 'images', maxCount: 10 }, { name: 'video', maxCount: 1 }]),
+    upload.fields([{ name: 'images', maxCount: 50 }, { name: 'video', maxCount: 1 }]),
     propertyController.createProperty
 );
 
@@ -49,7 +49,7 @@ router.put(
     '/:id',
     authenticate,
     requireVerifiedAgent,
-    upload.fields([{ name: 'images', maxCount: 10 }, { name: 'video', maxCount: 1 }]),
+    upload.fields([{ name: 'images', maxCount: 50 }, { name: 'video', maxCount: 1 }]),
     propertyController.updateProperty
 );
 

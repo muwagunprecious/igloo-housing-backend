@@ -17,7 +17,12 @@ const supabase = createClient(supabaseUrl, supabaseKey);
  * @returns {Promise<string>} - Public URL of the uploaded file
  */
 const uploadToSupabase = async (file, bucket = 'igloo-media') => {
-    const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+    const sanitized = file.originalname
+        .replace(/\s+/g, '-')
+        .replace(/[^a-zA-Z0-9._-]/g, '');
+    const ext = sanitized.substring(sanitized.lastIndexOf('.'));
+    const base = sanitized.substring(0, sanitized.lastIndexOf('.')).substring(0, 80);
+    const fileName = `${Date.now()}-${base}${ext}`;
     const filePath = `uploads/${fileName}`;
 
     const { data, error } = await supabase.storage

@@ -21,7 +21,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB max file size (increased for videos on Vercel)
+        fileSize: 100 * 1024 * 1024, // 100MB max file size
     },
     fileFilter: fileFilter,
 });
@@ -36,7 +36,7 @@ const uploadSingle = (fieldName) => {
 /**
  * Middleware for multiple file upload
  */
-const uploadMultiple = (fieldName, maxCount = 10) => {
+const uploadMultiple = (fieldName, maxCount = 50) => {
     return upload.array(fieldName, maxCount);
 };
 
