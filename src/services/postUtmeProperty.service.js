@@ -19,7 +19,10 @@ class PostUtmePropertyService {
             limit = 12,
         } = filters;
 
-        const where = { status: 'APPROVED' };
+        const where = { 
+            status: 'APPROVED',
+            availableRooms: { gt: 0 }
+        };
 
         if (area) {
             where.area = { contains: area, mode: 'insensitive' };
