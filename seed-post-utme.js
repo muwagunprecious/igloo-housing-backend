@@ -14,7 +14,7 @@ async function main() {
         const agent = await prisma.user.upsert({
             where: { email },
             update: {
-                role: 'AGENT',
+                role: 'RENTER',
                 isVerified: true,
                 fullName: 'Adeola Property Manager'
             },
@@ -22,7 +22,7 @@ async function main() {
                 email,
                 fullName: 'Adeola Property Manager',
                 password: hashedPassword,
-                role: 'AGENT',
+                role: 'RENTER',
                 isVerified: true,
                 bio: 'Managing clean, safe short-term student accommodation in Ago-Iwoye for Post-UTME candidates and visitors.'
             }
