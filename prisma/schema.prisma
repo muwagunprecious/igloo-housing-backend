@@ -16,7 +16,6 @@ model User {
   role             String            @default("STUDENT")
   avatar           String?
   bio              String?
-  phone            String?
   whatsapp         String?
   isVerified       Boolean           @default(false)
   isBlocked        Boolean           @default(false)
