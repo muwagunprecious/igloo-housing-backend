@@ -58,6 +58,20 @@ const requireAnyRole = (...roles) => {
     return requireRole(...roles);
 };
 
+const requirePostUtmeStudent = (req, res, next) => {
+    if (!req.user || (req.user.role !== 'POST_UTME_STUDENT' && req.user.role !== 'STUDENT')) {
+        return Response.forbidden(res, 'Post-UTME student access required');
+    }
+    next();
+};
+
+const requireRenter = (req, res, next) => {
+    if (!req.user || (req.user.role !== 'RENTER' && req.user.role !== 'STUDENT' && req.user.role !== 'ADMIN')) {
+        return Response.forbidden(res, 'Renter access required');
+    }
+    next();
+};
+
 module.exports = {
     requireRole,
     requireAdmin,
@@ -65,4 +79,6 @@ module.exports = {
     requireVerifiedAgent,
     requireStudent,
     requireAnyRole,
+    requirePostUtmeStudent,
+    requireRenter,
 };

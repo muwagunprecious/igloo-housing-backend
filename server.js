@@ -19,6 +19,12 @@ const universityRoutes = require('./src/routes/university.routes');
 const agentRoutes = require('./src/routes/agent.routes');
 const notificationRoutes = require('./src/routes/notification.routes');
 
+// Post-UTME Airbnb routes
+const postUtmePropertyRoutes = require('./src/routes/postUtmeProperty.routes');
+const postUtmeBookingRoutes = require('./src/routes/postUtmeBooking.routes');
+const postUtmeWalletRoutes = require('./src/routes/postUtmeWallet.routes');
+const postUtmeAdminRoutes = require('./src/routes/postUtmeAdmin.routes');
+
 // Initialize Express app
 const app = express();
 const server = http.createServer(app);
@@ -119,6 +125,12 @@ app.use('/api/roommate', roommateRoutes);
 app.use('/api/university', universityRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+// Post-UTME Airbnb routes
+app.use('/api/post-utme/properties', postUtmePropertyRoutes);
+app.use('/api/post-utme/bookings', postUtmeBookingRoutes);
+app.use('/api/post-utme', postUtmeWalletRoutes);
+app.use('/api/post-utme/admin', postUtmeAdminRoutes);
 
 // Socket.io for real-time chat
 const userSockets = new Map(); // Map to store userId -> socketId

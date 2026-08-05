@@ -40,7 +40,7 @@ class Validators {
             errors.password = 'Password must be at least 8 characters with letters and numbers';
         }
 
-        if (data.role && !['STUDENT', 'AGENT', 'ADMIN'].includes(data.role.toUpperCase())) {
+        if (data.role && !['STUDENT', 'AGENT', 'ADMIN', 'RENTER', 'POST_UTME_STUDENT'].includes(data.role.toUpperCase())) {
             errors.role = 'Invalid role';
         }
 

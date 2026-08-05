@@ -16,9 +16,12 @@ model User {
   role             String            @default("STUDENT")
   avatar           String?
   bio              String?
+  phone            String?
   whatsapp         String?
   isVerified       Boolean           @default(false)
   isBlocked        Boolean           @default(false)
+  walletBalance    Float             @default(0)
+  pendingBalance   Float             @default(0)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   universityId     String?
@@ -31,6 +34,17 @@ model User {
   roommateRequests RoommateRequest[]
   transactions     Transaction[]
   university       University?       @relation(fields: [universityId], references: [id])
+  postUtmeProperties    PostUtmeProperty[]    @relation("PostUtmePropertyOwner")
+  postUtmeBookings      PostUtmeBooking[]     @relation("PostUtmeBookingStudent")
+  postUtmeBookingsAsRenter PostUtmeBooking[]  @relation("PostUtmeBookingRenter")
+  walletTransactions    WalletTransaction[]
+  payoutRequests        PayoutRequest[]
+  postUtmeReviews       PostUtmeReview[]     @relation("PostUtmeReviewStudent")
+  refundRequests        RefundRequest[]       @relation("RefundRequestStudent")
+  refundRequestsAsRenter RefundRequest[]      @relation("RefundRequestRenter")
+  disputesAsStudent     Dispute[]             @relation("DisputeStudent")
+  disputesAsRenter      Dispute[]             @relation("DisputeRenter")
+  auditLogs             AuditLog[]
 
   @@index([email])
   @@index([role])
@@ -171,4 +185,224 @@ model Transaction {
   @@index([userId])
   @@index([reference])
   @@map("transactions")
+}
+
+// ============================================================
+// POST-UTME AIRBNB MODELS
+// ============================================================
+
+model PostUtmeProperty {
+  id               String                 @id @default(uuid())
+  ownerId          String
+  title            String
+  description      String
+  address          String
+  area             String
+  distanceFromOOU  String?
+  latitude         Float?
+  longitude        Float?
+  pricePerNight    Float
+  fullBookingPrice Float?
+  totalRooms       Int                    @default(1)
+  availableRooms   Int                    @default(1)
+  totalBeds        Int                    @default(1)
+  maxGuests        Int                    @default(1)
+  checkInDate      DateTime?
+  checkOutDate     DateTime?
+  amenities        String                 @default("[]")
+  rules            String?
+  checkInInfo      String?
+  status           String                 @default("DRAFT")
+  views            Int                    @default(0)
+  rating           Float                  @default(0)
+  reviewCount      Int                    @default(0)
+  isVerified       Boolean                @default(false)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  owner            User                   @relation("PostUtmePropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  images           PostUtmePropertyImage[]
+  bookings         PostUtmeBooking[]
+  reviews          PostUtmeReview[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([area])
+  @@index([isVerified])
+  @@map("post_utme_properties")
+}
+
+model PostUtmePropertyImage {
+  id         String          @id @default(uuid())
+  propertyId String
+  url        String
+  order      Int             @default(0)
+  createdAt  DateTime        @default(now())
+  property   PostUtmeProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("post_utme_property_images")
+}
+
+model PostUtmeBooking {
+  id               String           @id @default(uuid())
+  studentId        String
+  propertyId       String
+  renterId         String
+  checkInDate      DateTime
+  checkOutDate     DateTime
+  numberOfGuests   Int              @default(1)
+  numberOfNights   Int
+  totalPrice       Float
+  serviceFee       Float            @default(0)
+  totalPayable     Float
+  status           String           @default("PENDING_PAYMENT")
+  verificationCode String?
+  renterConfirmed  Boolean          @default(false)
+  checkedInAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  student          User             @relation("PostUtmeBookingStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  property         PostUtmeProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  renter           User             @relation("PostUtmeBookingRenter", fields: [renterId], references: [id], onDelete: Cascade)
+  payment          PostUtmePayment?
+  refundRequest    RefundRequest?
+
+  @@index([studentId])
+  @@index([propertyId])
+  @@index([renterId])
+  @@index([status])
+  @@map("post_utme_bookings")
+}
+
+model PostUtmePayment {
+  id            String          @id @default(uuid())
+  bookingId     String          @unique
+  amount        Float
+  currency      String          @default("NGN")
+  status        String          @default("PENDING")
+  reference     String          @unique
+  provider      String          @default("MOCK")
+  paidAt        DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  booking       PostUtmeBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([reference])
+  @@index([status])
+  @@map("post_utme_payments")
+}
+
+model WalletTransaction {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String
+  amount      Float
+  balance     Float
+  description String
+  reference   String?
+  bookingId   String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("wallet_transactions")
+}
+
+model PayoutRequest {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Float
+  bankName      String
+  accountNumber String
+  accountName   String
+  status        String   @default("PENDING")
+  adminNotes    String?
+  processedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("payout_requests")
+}
+
+model PostUtmeReview {
+  id         String          @id @default(uuid())
+  studentId  String
+  propertyId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime        @default(now())
+  student    User             @relation("PostUtmeReviewStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  property   PostUtmeProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, propertyId])
+  @@index([propertyId])
+  @@map("post_utme_reviews")
+}
+
+model RefundRequest {
+  id          String           @id @default(uuid())
+  bookingId   String           @unique
+  studentId   String
+  renterId    String
+  amount      Float
+  reason      String
+  description String
+  status      String           @default("REQUESTED")
+  adminNotes  String?
+  processedAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  booking     PostUtmeBooking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  student     User             @relation("RefundRequestStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  renter      User             @relation("RefundRequestRenter", fields: [renterId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([renterId])
+  @@index([status])
+  @@map("refund_requests")
+}
+
+model Dispute {
+  id          String   @id @default(uuid())
+  bookingId   String
+  studentId   String
+  renterId    String
+  filedBy     String
+  subject     String
+  description String
+  status      String   @default("OPEN")
+  adminNotes  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  student     User     @relation("DisputeStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  renter      User     @relation("DisputeRenter", fields: [renterId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([renterId])
+  @@index([status])
+  @@map("disputes")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entity     String
+  entityId   String?
+  details    String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

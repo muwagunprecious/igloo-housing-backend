@@ -62,6 +62,9 @@ class AuthService {
      * Login user
      */
     async login(email, password) {
+        email = (email || '').trim();
+        password = (password || '').trim();
+
         // Validate input
         if (!email || !password) {
             throw { message: 'Email and password are required', statusCode: 400 };
