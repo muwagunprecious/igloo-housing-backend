@@ -330,8 +330,7 @@ class PostUtmeBookingService {
     }
 
     if (
-      booking.status !== 'STUDENT_ARRIVED' &&
-      booking.status !== 'AWAITING_CHECKIN'
+      !['PAYMENT_SUCCESSFUL', 'BOOKING_CONFIRMED', 'AWAITING_CHECKIN', 'STUDENT_ARRIVED'].includes(booking.status)
     ) {
       throw new Error('Booking is not in a state that allows check-in confirmation');
     }
