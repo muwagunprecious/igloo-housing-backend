@@ -171,6 +171,60 @@ class PostUtmeBookingService {
     return result;
   }
 
+  async processSuccessfulPayment(bookingId, reference) {
+    const booking = await prisma.postUtmeBooking.findUnique({
+      where: { id: bookingId },
+      include: { property: true },
+    });
+
+    if (!booking || booking.status === 'PAYMENT_SUCCESSFUL') {
+      return booking;
+    }
+
+    return prisma.$transaction(async (tx) => {
+      await tx.postUtmePayment.updateMany({
+        where: { bookingId },
+        data: {
+          status: 'COMPLETED',
+          reference: reference || generatePaymentReference('PAYSTACK'),
+          paidAt: new Date(),
+        },
+      });
+
+      const updatedBooking = await tx.postUtmeBooking.update({
+        where: { id: bookingId },
+        data: { status: 'PAYMENT_SUCCESSFUL' },
+      });
+
+      const newAvailable = Math.max(0, booking.property.availableRooms - 1);
+      await tx.postUtmeProperty.update({
+        where: { id: booking.propertyId },
+        data: { availableRooms: newAvailable },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: booking.studentId,
+          title: 'Payment confirmed',
+          message: `Payment confirmed for ${booking.property.title}. Your booking code is ${booking.verificationCode}`,
+          type: 'PAYMENT',
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: booking.renterId,
+          title: 'Payment received',
+          message: `Payment received for ${booking.property.title}. A student has booked your property.`,
+          type: 'BOOKING',
+        },
+      });
+
+      return updatedBooking;
+    });
+  }
+
+
   async getStudentBookings(studentId, status) {
     const where = { studentId };
     if (status) {

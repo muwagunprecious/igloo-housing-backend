@@ -8,6 +8,9 @@ router.post('/', authenticate, controller.createBooking);
 router.get('/mine', authenticate, controller.getMyBookings);
 router.get('/renter/mine', authenticate, controller.getRenterBookings);
 
+// Paystack Webhook (No auth middleware required, signature verified via HMAC)
+router.post('/webhook', controller.handlePaystackWebhook);
+
 // Booking by ID
 router.get('/:id', authenticate, controller.getBookingById);
 router.post('/:id/pay', authenticate, controller.initializePayment);

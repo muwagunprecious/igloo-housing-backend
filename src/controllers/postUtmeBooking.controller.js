@@ -73,6 +73,32 @@ class PostUtmeBookingController {
             return Response.success(res, 'Booking status updated', booking);
         } catch (error) { next(error); }
     }
+
+    // POST /api/post-utme/bookings/webhook
+    async handlePaystackWebhook(req, res, next) {
+        try {
+            const crypto = require('crypto');
+            const secret = process.env.PAYSTACK_SECRET_KEY || '';
+            const signature = req.headers['x-paystack-signature'];
+            const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
+
+            if (hash === signature) {
+                const event = req.body;
+                if (event && event.event === 'charge.success') {
+                    const { reference, metadata } = event.data;
+                    const bookingId = metadata?.bookingId;
+                    if (bookingId) {
+                        await postUtmeBookingService.processSuccessfulPayment(bookingId, reference);
+                    }
+                }
+                return res.status(200).send('Webhook Processed');
+            }
+            return res.status(400).send('Invalid Signature');
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new PostUtmeBookingController();
+
