@@ -131,6 +131,40 @@ class PostUtmeWalletService {
         return { payoutRequests, total, page: pageNum, totalPages };
     }
 
+    async getAllPayouts(status, page = 1, limit = 20) {
+        const pageNum = Math.max(1, Number(page));
+        const take = Math.max(1, Number(limit));
+        const skip = (pageNum - 1) * take;
+
+        const where = {};
+        if (status) where.status = status;
+
+        const [payouts, total] = await Promise.all([
+            prisma.payoutRequest.findMany({
+                where,
+                include: {
+                    user: {
+                        select: { id: true, fullName: true, email: true },
+                    },
+                },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take,
+            }),
+            prisma.payoutRequest.count({ where }),
+        ]);
+
+        const totalPages = Math.ceil(total / take);
+
+        // Rename user → renter to match what the frontend expects
+        const payoutsWithRenter = payouts.map(({ user, ...rest }) => ({
+            ...rest,
+            renter: user,
+        }));
+
+        return { payouts: payoutsWithRenter, total, page: pageNum, totalPages };
+    }
+
     async processPayout(payoutId, adminId, action, adminNotes = '') {
         const payout = await prisma.payoutRequest.findUnique({
             where: { id: payoutId },
