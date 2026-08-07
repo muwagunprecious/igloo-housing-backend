@@ -339,11 +339,22 @@ class PostUtmeBookingService {
       throw new Error('Arrival already confirmed');
     }
 
-    if (booking.verificationCode !== code) {
+    // Trim and uppercase both sides for safe comparison
+    if ((booking.verificationCode || '').trim().toUpperCase() !== (code || '').trim().toUpperCase()) {
       throw new Error('Invalid verification code');
     }
 
-    const newBalance = Number(booking.renter.walletBalance) + Number(booking.totalPrice);
+    // Fetch renter's current wallet balance from user table
+    const renterUser = await prisma.user.findUnique({
+      where: { id: renterId },
+      select: { walletBalance: true, pendingBalance: true },
+    });
+
+    if (!renterUser) {
+      throw new Error('Renter account not found');
+    }
+
+    const newBalance = Number(renterUser.walletBalance) + Number(booking.totalPrice);
 
     const updatedBooking = await prisma.$transaction(async (tx) => {
       const updated = await tx.postUtmeBooking.update({
