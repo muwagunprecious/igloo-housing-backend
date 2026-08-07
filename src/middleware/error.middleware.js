@@ -65,7 +65,7 @@ const errorHandler = (err, req, res, next) => {
 
     // Custom error messages
     if (err.message) {
-        const statusCode = err.statusCode || 500;
+        const statusCode = err.statusCode || 400;
         return Response.error(res, err.message, null, statusCode);
     }
 

@@ -31,20 +31,20 @@ class PostUtmeBookingService {
     });
 
     if (!property) {
-      throw new Error('Property not found');
+      throw { message: 'Property not found', statusCode: 404 };
     }
 
     if (property.status !== 'APPROVED') {
-      throw new Error('Property is not available for booking');
+      throw { message: 'Property is not available for booking', statusCode: 400 };
     }
 
     if (property.availableRooms < 1) {
-      throw new Error('No available rooms for this property');
+      throw { message: 'No available rooms for this property', statusCode: 400 };
     }
 
     const numberOfNights = calculateNights(checkInDate, checkOutDate);
     if (numberOfNights < 1) {
-      throw new Error('Check-out date must be after check-in date');
+      throw { message: 'Check-out date must be after check-in date', statusCode: 400 };
     }
 
     const totalPrice = Number(property.pricePerNight) * numberOfNights;
