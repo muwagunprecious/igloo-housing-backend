@@ -113,15 +113,20 @@ class PostUtmeBookingService {
     });
 
     if (!booking) {
-      throw new Error('Booking not found');
+      throw { message: 'Booking not found', statusCode: 404 };
     }
 
     if (booking.studentId !== studentId) {
-      throw new Error('Unauthorized');
+      throw { message: 'Unauthorized', statusCode: 403 };
+    }
+
+    // Idempotent return if payment was already processed by Paystack webhook
+    if (booking.status === 'PAYMENT_SUCCESSFUL') {
+      return { booking, payment: booking.payment };
     }
 
     if (booking.status !== 'PENDING_PAYMENT') {
-      throw new Error('Booking is not pending payment');
+      throw { message: 'Booking is not pending payment', statusCode: 400 };
     }
 
     const mockReference = generatePaymentReference('MOCK');
