@@ -120,6 +120,62 @@ class AuthController {
             next(error);
         }
     }
+
+    /**
+     * Sync Clerk authenticated user with database
+     */
+     async syncClerk(req, res, next) {
+         try {
+             const { clerkId, email, fullName, role, avatar, whatsapp, universityId } = req.body;
+             const result = await authService.syncClerkUser({
+                 clerkId,
+                 email,
+                 fullName,
+                 role,
+                 avatar,
+                 whatsapp,
+                 universityId
+             });
+             return Response.success(res, 'Clerk user synced successfully', result);
+         } catch (error) {
+             next(error);
+         }
+     }
+
+    /**
+     * Complete Agent NIN and Paystack verification
+     */
+    async verifyAgent(req, res, next) {
+        try {
+            const { userId, email, clerkId, fullName, whatsapp, nin, universityId, reference } = req.body;
+            const result = await authService.verifyAgent({
+                userId: userId || req.user?.id,
+                email,
+                clerkId,
+                fullName,
+                whatsapp,
+                nin,
+                universityId,
+                reference
+            });
+            return Response.success(res, 'Agent verification submitted successfully', result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Check if an email exists and return its role for sign-in differentiation
+     */
+    async checkRole(req, res, next) {
+        try {
+            const { email } = req.query;
+            const result = await authService.checkEmailRole(email);
+            return Response.success(res, 'Email role checked', result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new AuthController();

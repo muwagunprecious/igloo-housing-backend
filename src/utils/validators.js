@@ -56,11 +56,18 @@ class Validators {
     static isValidCategory(category) {
         const validCategories = [
             'Self-contained',
+            'Room and Parlour',
+            'Mini Flat',
+            '1 Bedroom',
+            '2 Bedrooms',
+            '3+ Bedrooms',
             'Hostel',
+            'Shared Apartment',
+            // Legacy / fallback categories
             'Near Campus',
             'Luxury',
             'Budget',
-            'Apartment', // Keeping some legacy ones for compatibility if needed
+            'Apartment',
             'Studio',
             'Flat'
         ];

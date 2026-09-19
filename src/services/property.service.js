@@ -157,6 +157,7 @@ class PropertyService {
                 price: parseFloat(data.price),
                 location: Validators.sanitize(data.location),
                 campus: data.campus || agent.universityId, // Use agent's university automatically
+                distanceFromSchool: data.distanceFromSchool ? Validators.sanitize(data.distanceFromSchool) : null,
                 universityId: agent.universityId, // Enforce agent's university
                 category: data.category,
                 images: JSON.stringify(images),
@@ -212,6 +213,9 @@ class PropertyService {
         if (data.description) updateData.description = Validators.sanitize(data.description);
         if (data.price) updateData.price = parseFloat(data.price);
         if (data.location) updateData.location = Validators.sanitize(data.location);
+        if (data.distanceFromSchool !== undefined) {
+            updateData.distanceFromSchool = data.distanceFromSchool ? Validators.sanitize(data.distanceFromSchool) : null;
+        }
         if (data.category && Validators.isValidCategory(data.category)) {
             updateData.category = data.category;
         }

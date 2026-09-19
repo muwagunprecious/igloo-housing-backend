@@ -80,7 +80,8 @@ class PostUtmeBookingController {
             const crypto = require('crypto');
             const secret = process.env.PAYSTACK_SECRET_KEY || '';
             const signature = req.headers['x-paystack-signature'];
-            const hash = crypto.createHmac('sha512', secret).update(JSON.stringify(req.body)).digest('hex');
+            const payload = req.rawBody ? req.rawBody : JSON.stringify(req.body);
+            const hash = crypto.createHmac('sha512', secret).update(payload).digest('hex');
 
             if (hash === signature) {
                 const event = req.body;

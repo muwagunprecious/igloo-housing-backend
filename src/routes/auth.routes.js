@@ -19,6 +19,28 @@ router.post('/register', uploadSingle('avatar'), authController.register);
 router.post('/login', authController.login);
 
 /**
+ * @route   POST /api/auth/clerk-sync
+ * @desc    Sync Clerk user with database
+ * @access  Public
+ */
+router.post('/clerk-sync', authController.syncClerk);
+
+/**
+ * @route   POST /api/auth/agent-verify
+ * @desc    Submit Agent NIN and Paystack verification
+ * @access  Public
+ */
+router.post('/agent-verify', authController.verifyAgent);
+router.post('/confirm-verification-fee', authController.verifyAgent);
+
+/**
+ * @route   GET /api/auth/check-role
+ * @desc    Check email role for sign-in differentiation
+ * @access  Public
+ */
+router.get('/check-role', authController.checkRole);
+
+/**
  * @route   GET /api/auth/me
  * @desc    Get current user info
  * @access  Private

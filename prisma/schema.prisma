@@ -19,6 +19,10 @@ model User {
   whatsapp         String?
   isVerified       Boolean           @default(false)
   isBlocked        Boolean           @default(false)
+  clerkId          String?           @unique
+  nin              String?
+  verificationFeePaid Boolean        @default(false)
+  verificationStatus  String         @default("PENDING")
   walletBalance    Float             @default(0)
   pendingBalance   Float             @default(0)
   createdAt        DateTime          @default(now())
@@ -71,6 +75,7 @@ model Property {
   price            Float
   location         String
   campus           String
+  distanceFromSchool String?
   universityId     String?
   category         String
   images           String

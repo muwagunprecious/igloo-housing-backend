@@ -7,33 +7,54 @@ class AdminService {
      * Get platform statistics
      */
     async getStats() {
+        // Group queries to drastically reduce concurrent database connections and pool exhaustion
         const [
-            totalUsers,
-            totalStudents,
-            totalAgents,
-            totalAdmins,
+            userRoleCounts,
             verifiedAgents,
             pendingAgents,
             blockedUsers,
-            totalProperties,
+            propertyStatusCounts,
             totalUniversities,
             totalMessages,
             totalRoommateRequests,
             totalTransactions,
         ] = await Promise.all([
-            prisma.user.count(),
-            prisma.user.count({ where: { role: 'STUDENT' } }),
-            prisma.user.count({ where: { role: 'AGENT' } }),
-            prisma.user.count({ where: { role: 'ADMIN' } }),
-            prisma.user.count({ where: { role: 'AGENT', isVerified: true } }),
-            prisma.user.count({ where: { role: 'AGENT', isVerified: false } }),
-            prisma.user.count({ where: { isBlocked: true } }),
-            prisma.property.count(),
-            prisma.university.count(),
-            prisma.message.count(),
-            prisma.roommateRequest.count(),
-            prisma.transaction.count(),
+            prisma.user.groupBy({ by: ['role'], _count: { id: true } }).catch(() => []),
+            prisma.user.count({ where: { role: 'AGENT', isVerified: true } }).catch(() => 0),
+            prisma.user.count({ where: { role: 'AGENT', isVerified: false } }).catch(() => 0),
+            prisma.user.count({ where: { isBlocked: true } }).catch(() => 0),
+            prisma.property.groupBy({ by: ['status'], _count: { id: true } }).catch(() => []),
+            prisma.university.count().catch(() => 0),
+            prisma.message.count().catch(() => 0),
+            prisma.roommateRequest.count().catch(() => 0),
+            prisma.transaction.count().catch(() => 0),
         ]);
+
+        // Aggregate user counts from groupBy
+        let totalUsers = 0;
+        let totalStudents = 0;
+        let totalAgents = 0;
+        let totalAdmins = 0;
+        for (const item of userRoleCounts) {
+            const count = item._count?.id || 0;
+            totalUsers += count;
+            const role = item.role?.toUpperCase();
+            if (role === 'STUDENT') totalStudents += count;
+            else if (role === 'AGENT') totalAgents += count;
+            else if (role === 'ADMIN') totalAdmins += count;
+        }
+
+        // Aggregate property counts from groupBy
+        let totalProperties = 0;
+        let pendingProperties = 0;
+        let approvedProperties = 0;
+        for (const item of propertyStatusCounts) {
+            const count = item._count?.id || 0;
+            totalProperties += count;
+            const status = item.status?.toUpperCase();
+            if (status === 'PENDING') pendingProperties += count;
+            else if (status === 'APPROVED') approvedProperties += count;
+        }
 
         return {
             users: {
@@ -49,6 +70,13 @@ class AdminService {
                 pending: pendingAgents,
             },
             properties: totalProperties,
+            pendingProperties: pendingProperties,
+            approvedProperties: approvedProperties,
+            propertyStats: {
+                total: totalProperties,
+                pending: pendingProperties,
+                approved: approvedProperties,
+            },
             universities: totalUniversities,
             messages: totalMessages,
             roommateRequests: totalRoommateRequests,
@@ -107,7 +135,7 @@ class AdminService {
         const [updatedAgent] = await prisma.$transaction([
             prisma.user.update({
                 where: { id: agentId },
-                data: { isVerified: true },
+                data: { isVerified: true, verificationStatus: 'APPROVED' },
                 select: {
                     id: true,
                     fullName: true,
@@ -147,7 +175,7 @@ class AdminService {
         const [updatedUser] = await prisma.$transaction([
             prisma.user.update({
                 where: { id: agentId },
-                data: { role: 'STUDENT', isVerified: false },
+                data: { role: 'STUDENT', isVerified: false, verificationStatus: 'REJECTED' },
                 select: {
                     id: true,
                     fullName: true,
@@ -414,15 +442,15 @@ class AdminService {
         const where = {};
 
         if (filters.role) {
-            where.role = filters.role;
+            where.role = filters.role.toUpperCase();
         }
 
-        if (filters.isBlocked !== undefined) {
-            where.isBlocked = filters.isBlocked;
+        if (filters.isBlocked !== undefined && filters.isBlocked !== null) {
+            where.isBlocked = filters.isBlocked === 'true' || filters.isBlocked === true;
         }
 
-        if (filters.isVerified !== undefined) {
-            where.isVerified = filters.isVerified;
+        if (filters.isVerified !== undefined && filters.isVerified !== null) {
+            where.isVerified = filters.isVerified === 'true' || filters.isVerified === true;
         }
 
         const users = await prisma.user.findMany({
@@ -433,6 +461,17 @@ class AdminService {
                 email: true,
                 role: true,
                 avatar: true,
+                whatsapp: true,
+                nin: true,
+                verificationFeePaid: true,
+                verificationStatus: true,
+                universityId: true,
+                university: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
                 isVerified: true,
                 isBlocked: true,
                 createdAt: true,
