@@ -21,6 +21,13 @@ router.get('/agent/my-properties', authenticate, requireAgent, propertyControlle
 router.get('/', propertyController.getAllProperties);
 
 /**
+ * @route   POST /api/properties/upload-url
+ * @desc    Get signed upload URLs for direct client-to-Supabase upload
+ * @access  Verified agents only
+ */
+router.post('/upload-url', authenticate, requireVerifiedAgent, propertyController.getSignedUploadUrl);
+
+/**
  * @route   GET /api/properties/:id
  * @desc    Get property by ID
  * @access  Public

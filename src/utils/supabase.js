@@ -44,4 +44,45 @@ const uploadToSupabase = async (file, bucket = 'igloo-media') => {
     return publicUrl;
 };
 
-module.exports = { supabase, uploadToSupabase };
+/**
+ * Creates a signed upload URL for direct client-side upload to Supabase Storage.
+ * Bypasses Vercel serverless request body limits (4.5MB).
+ * @param {string} originalName - Original filename
+ * @param {string} bucket - Supabase bucket name
+ * @returns {Promise<{ originalName: string, signedUrl: string, filePath: string, publicUrl: string }>}
+ */
+const getSignedUploadUrl = async (originalName, bucket = 'igloo-media') => {
+    const sanitized = (originalName || 'file')
+        .replace(/\s+/g, '-')
+        .replace(/[^a-zA-Z0-9._-]/g, '');
+    const ext = sanitized.includes('.') ? sanitized.substring(sanitized.lastIndexOf('.')) : '';
+    const base = sanitized.includes('.') 
+        ? sanitized.substring(0, sanitized.lastIndexOf('.')).substring(0, 80)
+        : sanitized.substring(0, 80);
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${base}${ext}`;
+    const filePath = `uploads/${fileName}`;
+
+    const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUploadUrl(filePath);
+
+    if (error) {
+        console.error('Supabase signed upload URL error:', error);
+        throw new Error(`Failed to create signed upload URL: ${error.message}`);
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
+
+    return {
+        originalName,
+        signedUrl: data.signedUrl,
+        token: data.token,
+        filePath,
+        publicUrl
+    };
+};
+
+module.exports = { supabase, uploadToSupabase, getSignedUploadUrl };
+

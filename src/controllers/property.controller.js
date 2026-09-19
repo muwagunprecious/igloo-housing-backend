@@ -40,6 +40,28 @@ class PropertyController {
     }
 
     /**
+     * Get signed upload URLs for direct client upload to Supabase Storage
+     * Bypasses Vercel serverless request body limits (4.5MB).
+     */
+    async getSignedUploadUrl(req, res, next) {
+        try {
+            const { files } = req.body;
+            if (!files || !Array.isArray(files) || files.length === 0) {
+                return Response.error(res, 'Please provide an array of files: [{ fileName, fileType }]', 400);
+            }
+
+            const { getSignedUploadUrl } = require('../utils/supabase');
+            const signedUrls = await Promise.all(
+                files.map(f => getSignedUploadUrl(f.fileName || f.name))
+            );
+
+            return Response.success(res, 'Signed upload URLs generated successfully', signedUrls);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * Create property (Agent only)
      */
     async createProperty(req, res, next) {
@@ -47,17 +69,32 @@ class PropertyController {
             const propertyData = req.body;
             const { uploadToSupabase } = require('../utils/supabase');
 
-            // Handle multi-field file uploads to Supabase
+            // Collect direct image URLs if provided in request body
             let images = [];
+            if (propertyData.images) {
+                if (Array.isArray(propertyData.images)) {
+                    images = propertyData.images;
+                } else if (typeof propertyData.images === 'string') {
+                    try {
+                        const parsed = JSON.parse(propertyData.images);
+                        images = Array.isArray(parsed) ? parsed : [propertyData.images];
+                    } catch (e) {
+                        images = [propertyData.images];
+                    }
+                }
+            }
+
+            // Handle multipart file uploads to Supabase (fallback/direct)
             if (req.files?.images) {
                 console.log('📸 Uploading', req.files.images.length, 'images to Supabase...');
-                images = await Promise.all(
+                const uploadedImages = await Promise.all(
                     req.files.images.map(file => uploadToSupabase(file))
                 );
+                images = [...images, ...uploadedImages];
                 console.log('✅ Images uploaded:', images);
             }
 
-            let video = null;
+            let video = propertyData.video || null;
             if (req.files?.video) {
                 console.log('🎥 Uploading video to Supabase...');
                 video = await uploadToSupabase(req.files.video[0]);
@@ -85,15 +122,30 @@ class PropertyController {
             const propertyData = req.body;
             const { uploadToSupabase } = require('../utils/supabase');
 
-            // Handle multi-field file uploads to Supabase
+            // Collect direct image URLs if provided
             let newImages = [];
-            if (req.files?.images) {
-                newImages = await Promise.all(
-                    req.files.images.map(file => uploadToSupabase(file))
-                );
+            if (propertyData.images) {
+                if (Array.isArray(propertyData.images)) {
+                    newImages = propertyData.images;
+                } else if (typeof propertyData.images === 'string') {
+                    try {
+                        const parsed = JSON.parse(propertyData.images);
+                        newImages = Array.isArray(parsed) ? parsed : [propertyData.images];
+                    } catch (e) {
+                        newImages = [propertyData.images];
+                    }
+                }
             }
 
-            let newVideo = null;
+            // Handle multi-field file uploads to Supabase
+            if (req.files?.images) {
+                const uploaded = await Promise.all(
+                    req.files.images.map(file => uploadToSupabase(file))
+                );
+                newImages = [...newImages, ...uploaded];
+            }
+
+            let newVideo = propertyData.video || null;
             if (req.files?.video) {
                 newVideo = await uploadToSupabase(req.files.video[0]);
             }
