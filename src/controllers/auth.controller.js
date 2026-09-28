@@ -148,9 +148,11 @@ class AuthController {
     async verifyAgent(req, res, next) {
         try {
             const { userId, email, clerkId, fullName, whatsapp, nin, universityId, reference } = req.body;
+            const targetUserId = userId || req.user?.id;
+            const targetEmail = email || req.user?.email;
             const result = await authService.verifyAgent({
-                userId: userId || req.user?.id,
-                email,
+                userId: targetUserId,
+                email: targetEmail,
                 clerkId,
                 fullName,
                 whatsapp,

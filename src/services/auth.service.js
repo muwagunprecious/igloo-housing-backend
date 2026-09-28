@@ -330,6 +330,14 @@ class AuthService {
         if (!user && normalizedEmail) {
             user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
         }
+        if (!user && reference && typeof reference === 'string' && reference.startsWith('agent-verify-')) {
+            const raw = reference.replace('agent-verify-', '');
+            const lastDashIndex = raw.lastIndexOf('-');
+            const candidateId = lastDashIndex > 0 ? raw.substring(0, lastDashIndex) : raw;
+            if (candidateId) {
+                user = await prisma.user.findUnique({ where: { id: candidateId } }).catch(() => null);
+            }
+        }
 
         const cleanName = (fullName && fullName.trim() && fullName.trim().toUpperCase() !== 'JOHN DOE')
             ? fullName.trim()

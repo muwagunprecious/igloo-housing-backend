@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
-const { authenticate } = require('../middleware/auth.middleware');
+const { authenticate, optionalAuth } = require('../middleware/auth.middleware');
 const { uploadSingle } = require('../utils/upload');
 
 /**
@@ -30,8 +30,8 @@ router.post('/clerk-sync', authController.syncClerk);
  * @desc    Submit Agent NIN and Paystack verification
  * @access  Public
  */
-router.post('/agent-verify', authController.verifyAgent);
-router.post('/confirm-verification-fee', authController.verifyAgent);
+router.post('/agent-verify', optionalAuth, authController.verifyAgent);
+router.post('/confirm-verification-fee', optionalAuth, authController.verifyAgent);
 
 /**
  * @route   GET /api/auth/check-role

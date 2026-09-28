@@ -86,10 +86,34 @@ class PostUtmeBookingController {
             if (hash === signature) {
                 const event = req.body;
                 if (event && event.event === 'charge.success') {
-                    const { reference, metadata } = event.data;
+                    const { reference, metadata, customer } = event.data;
                     const bookingId = metadata?.bookingId;
                     if (bookingId) {
                         await postUtmeBookingService.processSuccessfulPayment(bookingId, reference);
+                    } else if (reference && typeof reference === 'string' && reference.startsWith('agent-verify-')) {
+                        const { prisma } = require('../config/db');
+                        const raw = reference.replace('agent-verify-', '');
+                        const lastDashIndex = raw.lastIndexOf('-');
+                        const candidateId = lastDashIndex > 0 ? raw.substring(0, lastDashIndex) : raw;
+                        const customerEmail = customer?.email ? customer.email.toLowerCase().trim() : null;
+
+                        let agentUser = null;
+                        if (candidateId) {
+                            agentUser = await prisma.user.findUnique({ where: { id: candidateId } }).catch(() => null);
+                        }
+                        if (!agentUser && customerEmail) {
+                            agentUser = await prisma.user.findUnique({ where: { email: customerEmail } }).catch(() => null);
+                        }
+                        if (agentUser) {
+                            await prisma.user.update({
+                                where: { id: agentUser.id },
+                                data: {
+                                    role: 'AGENT',
+                                    verificationFeePaid: true,
+                                    verificationStatus: 'PENDING'
+                                }
+                            });
+                        }
                     }
                 }
                 return res.status(200).send('Webhook Processed');
