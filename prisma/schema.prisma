@@ -410,3 +410,14 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+

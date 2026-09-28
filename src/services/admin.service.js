@@ -570,15 +570,24 @@ class AdminService {
         // Hash password
         const hashedPassword = await bcrypt.hash(data.password, 10);
 
+        // Determine role and initial verification status
+        const role = (data.role || 'STUDENT').toUpperCase();
+        const isAgent = role === 'AGENT';
+        const isAdmin = role === 'ADMIN';
+
         // Create user
         const user = await prisma.user.create({
             data: {
                 fullName: Validators.sanitize(data.fullName),
-                email: data.email.toLowerCase(),
+                email: data.email.toLowerCase().trim(),
                 password: hashedPassword,
-                role: (data.role || 'STUDENT').toUpperCase(),
+                role: role,
+                whatsapp: data.whatsapp ? data.whatsapp.trim() : null,
+                nin: data.nin ? data.nin.trim() : null,
                 universityId: data.universityId || null,
-                isVerified: data.role.toUpperCase() === 'ADMIN'
+                isVerified: isAdmin || isAgent,
+                verificationFeePaid: isAgent ? true : false,
+                verificationStatus: (isAdmin || isAgent) ? 'APPROVED' : 'UNVERIFIED'
             }
         });
 

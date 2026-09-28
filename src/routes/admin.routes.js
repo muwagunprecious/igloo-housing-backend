@@ -99,11 +99,27 @@ router.get('/actions', adminController.getAdminActions);
  */
 router.get('/transactions', adminController.getAllTransactions);
 
+const settingsController = require('../controllers/settings.controller');
+
 /**
  * @route   POST /api/admin/users/create
  * @desc    Create a new user
  * @access  Admin only
  */
 router.post('/users/create', adminController.createUser);
+
+/**
+ * @route   GET /api/admin/settings/agent-fee
+ * @desc    Get agent verification fee
+ * @access  Admin only
+ */
+router.get('/settings/agent-fee', settingsController.getAgentFee);
+
+/**
+ * @route   PUT /api/admin/settings/agent-fee
+ * @desc    Update agent verification fee
+ * @access  Admin only
+ */
+router.put('/settings/agent-fee', settingsController.updateAgentFee);
 
 module.exports = router;

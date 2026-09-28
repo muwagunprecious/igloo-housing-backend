@@ -20,6 +20,7 @@ const roommateRoutes = require('./src/routes/roommate.routes');
 const universityRoutes = require('./src/routes/university.routes');
 const agentRoutes = require('./src/routes/agent.routes');
 const notificationRoutes = require('./src/routes/notification.routes');
+const settingsRoutes = require('./src/routes/settings.routes');
 
 // Post-UTME Airbnb routes
 const postUtmePropertyRoutes = require('./src/routes/postUtmeProperty.routes');
@@ -131,6 +132,7 @@ app.use('/api/roommate', roommateRoutes);
 app.use('/api/university', universityRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Post-UTME Airbnb routes
 app.use('/api/post-utme/properties', postUtmePropertyRoutes);
