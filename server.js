@@ -130,6 +130,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/roommate', roommateRoutes);
 app.use('/api/university', universityRoutes);
+app.use('/api/universities', universityRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
