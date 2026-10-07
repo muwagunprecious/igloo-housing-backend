@@ -101,9 +101,9 @@ class PropertyController {
                 console.log('✅ Video uploaded:', video);
             }
 
-            // Validation: Picture first before video
-            if (video && images.length === 0) {
-                return Response.error(res, 'You must upload at least one picture before adding a video', 400);
+            // Validation: Images and videos are both optional, but at least one media item must be provided
+            if (images.length === 0 && !video) {
+                return Response.error(res, 'Please upload at least one picture or video for the property', 400);
             }
 
             const property = await propertyService.createProperty(req.user.id, propertyData, images, video);

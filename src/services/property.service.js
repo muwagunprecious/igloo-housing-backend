@@ -236,12 +236,8 @@ class PropertyService {
         }
 
         // Handle video
-        if (newVideo) {
-            // Validation: Ensure there's at least one image (new or existing)
-            if (finalImages.length === 0) {
-                throw { message: 'You must have at least one picture before adding a video', statusCode: 400 };
-            }
-            updateData.video = newVideo;
+        if (newVideo !== null && newVideo !== undefined) {
+            updateData.video = newVideo === '' ? null : newVideo;
         }
 
         // Verify campus if changing
