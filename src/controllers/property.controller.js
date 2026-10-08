@@ -19,7 +19,7 @@ class PropertyController {
                 status: req.query.status,
             };
 
-            const properties = await propertyService.getAllProperties(filters);
+            const properties = await propertyService.getAllProperties(filters, req.user?.id);
             return Response.success(res, 'Properties retrieved', properties);
         } catch (error) {
             next(error);
@@ -32,8 +32,21 @@ class PropertyController {
     async getPropertyById(req, res, next) {
         try {
             const { id } = req.params;
-            const property = await propertyService.getPropertyById(id);
+            const property = await propertyService.getPropertyById(id, req.user?.id);
             return Response.success(res, 'Property retrieved', property);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * Get agent's contact info for a property (authenticated users only)
+     */
+    async getAgentContact(req, res, next) {
+        try {
+            const { id } = req.params;
+            const agent = await propertyService.getAgentContact(id);
+            return Response.success(res, 'Agent contact retrieved', agent);
         } catch (error) {
             next(error);
         }
