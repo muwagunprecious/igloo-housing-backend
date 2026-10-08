@@ -118,7 +118,7 @@ class AuthService {
     /**
      * Get user profile
      */
-    async getProfile(userId, viewerId = userId) {
+    async getProfile(userId) {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
@@ -139,12 +139,6 @@ class AuthService {
 
         if (!user) {
             throw { message: 'User not found', statusCode: 404 };
-        }
-
-        // Contact details are private - only the owner may see them
-        if (viewerId !== userId) {
-            delete user.email;
-            delete user.whatsapp;
         }
 
         return user;

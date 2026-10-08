@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const propertyController = require('../controllers/property.controller');
-const { authenticate, optionalAuth } = require('../middleware/auth.middleware');
+const { authenticate } = require('../middleware/auth.middleware');
 const { requireVerifiedAgent, requireAgent } = require('../middleware/role.middleware');
 const { uploadMultiple, upload } = require('../utils/upload');
 
@@ -16,9 +16,9 @@ router.get('/agent/my-properties', authenticate, requireAgent, propertyControlle
 /**
  * @route   GET /api/properties
  * @desc    Get all properties with filters
- * @access  Public (agent contact info only returned to authenticated users)
+ * @access  Public
  */
-router.get('/', optionalAuth, propertyController.getAllProperties);
+router.get('/', propertyController.getAllProperties);
 
 /**
  * @route   POST /api/properties/upload-url
@@ -28,18 +28,11 @@ router.get('/', optionalAuth, propertyController.getAllProperties);
 router.post('/upload-url', authenticate, requireVerifiedAgent, propertyController.getSignedUploadUrl);
 
 /**
- * @route   GET /api/properties/:id/contact
- * @desc    Get agent's contact info for a property (WhatsApp etc.)
- * @access  Authenticated users only
- */
-router.get('/:id/contact', authenticate, propertyController.getAgentContact);
-
-/**
  * @route   GET /api/properties/:id
  * @desc    Get property by ID
- * @access  Public (agent contact info only returned to authenticated users)
+ * @access  Public
  */
-router.get('/:id', optionalAuth, propertyController.getPropertyById);
+router.get('/:id', propertyController.getPropertyById);
 
 /**
  * @route   POST /api/properties

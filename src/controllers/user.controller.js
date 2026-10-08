@@ -8,7 +8,7 @@ class UserController {
     async getUserById(req, res, next) {
         try {
             const { id } = req.params;
-            const user = await userService.getProfile(id, req.user.id);
+            const user = await userService.getProfile(id);
             return Response.success(res, 'User retrieved', user);
         } catch (error) {
             next(error);
