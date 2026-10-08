@@ -3,18 +3,9 @@ const Validators = require('../utils/validators');
 
 class PropertyService {
     /**
-     * Remove agent contact details from a property payload for guests
-     */
-    stripAgentContact(agent) {
-        if (!agent) return;
-        delete agent.whatsapp;
-        delete agent.email;
-    }
-
-    /**
      * Get all properties with filters
      */
-    async getAllProperties(filters = {}, userId = null) {
+    async getAllProperties(filters = {}) {
         const where = {
             isAvailable: true,
             status: filters.status || 'APPROVED' // Default to APPROVED
@@ -75,17 +66,13 @@ class PropertyService {
         });
         console.log('🔍 Found properties count:', properties.length);
 
-        if (!userId) {
-            properties.forEach(property => this.stripAgentContact(property.agent));
-        }
-
         return properties;
     }
 
     /**
      * Get property by ID
      */
-    async getPropertyById(id, userId = null) {
+    async getPropertyById(id) {
         const property = await prisma.property.findUnique({
             where: { id },
             include: {
@@ -126,39 +113,7 @@ class PropertyService {
             throw { message: 'Property not found', statusCode: 404 };
         }
 
-        if (!userId) {
-            this.stripAgentContact(property.agent);
-        }
-
         return property;
-    }
-
-    /**
-     * Get agent contact info for a property (authenticated users only)
-     */
-    async getAgentContact(propertyId) {
-        const property = await prisma.property.findUnique({
-            where: { id: propertyId },
-            select: {
-                id: true,
-                agent: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                        avatar: true,
-                        whatsapp: true,
-                        isVerified: true,
-                    },
-                },
-            },
-        });
-
-        if (!property) {
-            throw { message: 'Property not found', statusCode: 404 };
-        }
-
-        return property.agent;
     }
 
     /**
@@ -281,8 +236,8 @@ class PropertyService {
         }
 
         // Handle video
-        if (newVideo) {
-            updateData.video = newVideo;
+        if (newVideo !== null && newVideo !== undefined) {
+            updateData.video = newVideo === '' ? null : newVideo;
         }
 
         // Verify campus if changing

@@ -19,7 +19,7 @@ class PropertyController {
                 status: req.query.status,
             };
 
-            const properties = await propertyService.getAllProperties(filters, req.user?.id);
+            const properties = await propertyService.getAllProperties(filters);
             return Response.success(res, 'Properties retrieved', properties);
         } catch (error) {
             next(error);
@@ -32,21 +32,8 @@ class PropertyController {
     async getPropertyById(req, res, next) {
         try {
             const { id } = req.params;
-            const property = await propertyService.getPropertyById(id, req.user?.id);
+            const property = await propertyService.getPropertyById(id);
             return Response.success(res, 'Property retrieved', property);
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    /**
-     * Get agent's contact info for a property (authenticated users only)
-     */
-    async getAgentContact(req, res, next) {
-        try {
-            const { id } = req.params;
-            const agent = await propertyService.getAgentContact(id);
-            return Response.success(res, 'Agent contact retrieved', agent);
         } catch (error) {
             next(error);
         }
@@ -112,6 +99,11 @@ class PropertyController {
                 console.log('🎥 Uploading video to Supabase...');
                 video = await uploadToSupabase(req.files.video[0]);
                 console.log('✅ Video uploaded:', video);
+            }
+
+            // Validation: Images and videos are both optional, but at least one media item must be provided
+            if (images.length === 0 && !video) {
+                return Response.error(res, 'Please upload at least one picture or video for the property', 400);
             }
 
             const property = await propertyService.createProperty(req.user.id, propertyData, images, video);
